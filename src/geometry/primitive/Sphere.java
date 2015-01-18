@@ -12,9 +12,9 @@ import raytracer.Ray;
 
 public class Sphere extends Primitive {
 	private Point3D center;
-	private Double radius;
+	private double radius;
 
-	public Sphere(Point3D center, Double radius, Material material) {
+	public Sphere(Point3D center, double radius, Material material) {
 		super(material);
 		this.center = center;
 		this.radius = radius;
@@ -22,92 +22,56 @@ public class Sphere extends Primitive {
 
 	@Override
 	public Intersection intersect(Ray ray) {
-		Point3D E = ray.getOrigin();
-		Vector3D V = ray.getDirection();
-		Vector3D EO = new Vector3D(E, this.center, false);
+		Point3D O = ray.getOrigin();		// Ray origin E
+		Vector3D D = ray.getDirection();	// Ray direction V
+		Vector3D OC = new Vector3D(O, this.center, false);
 
-		Double v = EO.dotProduct(ray.getDirection());
-		Double d = radius * radius - (EO.dotProduct(EO) - (v * v));
+		double v = Vector3D.dot(OC, D);
+		double d = Math.pow(radius, 2) - (Vector3D.dot(OC, OC) - Math.pow(v, 2));
 
-		if (d <= 0.0)
+		if (d <= EPSILON)
 			return null;
 		else {
 			d = Math.sqrt(d);
-			if (v - d <= 0)
+			if (v - d <= EPSILON)
 				return null;
 		}
 
-		Point3D p = new Point3D(E.x + (v - d) * V.x, E.y + (v - d) * V.y, E.z + (v - d) * V.z);
+		Point3D p = new Point3D(O.x + (v - d) * D.x, O.y + (v - d) * D.y, O.z + (v - d) * D.z);
 
 		return new Intersection(this, p, v - d);
 	}
 
 	@Override
-	public Double getCosine(Ray ray) {
-		Vector3D n = new Vector3D(this.center, ray.getOrigin());
-
-		return n.dotProduct(ray.getDirection());
+	public Vector3D getNormal(Intersection intersection) {
+		return new Vector3D(this.center, intersection.getPoint());
 	}
 
 	@Override
-	public Ray getReflected(Ray ray, Point3D p) {
-		Vector3D normal = new Vector3D(this.center, p);
-		Vector3D direction = ray.getDirection();
-
-		Double c1 = - normal.dotProduct(direction);
-
-		Vector3D reflectedDir = new Vector3D(direction.x + (2 * normal.x * c1),
-				direction.y + (2 * normal.y * c1), direction.z + (2 * normal.z * c1));
-
-		Ray reflected = new Ray(p, reflectedDir);
-
-		return reflected;
-	}
-
-	@Override
-	public Ray getRefracted(Ray ray, Point3D p) {
-		Double oRefIndex = ray.getRefractionIndex();
-		Double newRefIndex = this.material.getRefractionIndex();
-
-		Double n = oRefIndex / newRefIndex;
-
-		Vector3D normal = new Vector3D(this.center, p);
-		Vector3D direction = ray.getDirection();
-
-		Double c1 = - normal.dotProduct(direction);
-		Double c2 = Math.sqrt(1 - n * n * Math.pow(1 - c1, 2));
-
-		Vector3D refractedDir = new Vector3D((n * direction.x) + (n * c1 - c2) * normal.x,
-				(n * direction.y) + (n * c1 - c2) * normal.y,
-				(n * direction.z) + (n * c1 - c2) * normal.z);
-
-		Ray refracted = new Ray(p, refractedDir, newRefIndex);
-
-		return refracted;
-	}
-
-	@Override
-	public Color getColor(Point3D p) {
+	public Color getColor(Intersection intersection) {
+		/* Uniform color */
 		if (this.material.getColor() != null)
 			return this.material.getColor();
+
+		/* Texture */
 
 		// North pole
 		Vector3D vn = new Vector3D(0.0, 0.1, 0.0);
 		// Equator
 		Vector3D ve = new Vector3D(1.0, 0.0, 0.0);
 		// Position
-		Vector3D vp = new Vector3D(this.center, p);
+		Vector3D vp = new Vector3D(this.center, intersection.getPoint());
 
 		// Horizontal pixel position
-		Double u;
+		double u;
 		// Vertical pixel position
-		Double v;
+		double v;
 
-		Double phi = Math.acos(-vn.dotProduct(vp));
+		double phi = Math.acos(-Vector3D.dot(vn, vp));
 		v = phi / Math.PI;
 
-		Double theta = (Math.acos(ve.dotProduct(vp) / Math.sin(phi))) / (2 * Math.PI);
-		if (vn.crossProduct(ve).dotProduct(vp) > 0)
+		double theta = (Math.acos(Vector3D.dot(ve, vp) / Math.sin(phi))) / (2 * Math.PI);
+		if (Vector3D.dot(Vector3D.cross(vn, ve), vp) > 0)
 			u = theta;
 		else
 			u = 1 - theta;
@@ -123,7 +87,7 @@ public class Sphere extends Primitive {
 		return new Color(texture.getRGB(texture.getWidth() - w, texture.getHeight() - h));
 	}
 
-	public Double getRadius() {
+	public double getRadius() {
 		return this.radius;
 	}
 }

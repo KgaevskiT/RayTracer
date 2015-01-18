@@ -12,7 +12,7 @@
 hs_err_pid*
 
 # Render images
-*.png
+# *.png
 
 # Ressources
 textures/

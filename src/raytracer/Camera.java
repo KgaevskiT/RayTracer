@@ -23,7 +23,8 @@ public class Camera {
 		this.direction = new Vector3D(position, lookAt);
 	}
 
-	public Ray getRay(Double x, Double y) {
-		return new Ray(new Point3D(position.x + x, position.y + y, position.z), direction);
+	public Ray getRay(double x, double y) {
+		return new Ray(new Point3D(position.x + x, position.y + y,
+				position.z), direction);
 	}
 }

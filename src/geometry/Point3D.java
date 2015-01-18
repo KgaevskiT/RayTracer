@@ -26,6 +26,20 @@ public class Point3D {
 		return new Point3D(x - p.x, y - p.y, z - p.z);
 	}
 
+	public static Point3D barycenter(Point3D[] vertices) {
+		double x = 0, y = 0, z = 0;
+
+		for (Point3D p : vertices) {
+			x += p.x;
+			y += p.y;
+			z += p.z;
+		}
+
+		return new Point3D(x / vertices.length, y / vertices.length, z / vertices.length);
+	}
+
+
+
 	@Override
 	public String toString() {
 		return "(" + x + "; " + y + "; " + z + ")";

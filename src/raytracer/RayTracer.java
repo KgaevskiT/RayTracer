@@ -7,17 +7,30 @@ import geometry.primitive.Scene;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.RecursiveTask;
 
 import postprocessing.AntiAliasing;
-import utils.ProgressBar;
 import config.Config;
 
 
-public class RayTracer {
+public class RayTracer extends RecursiveTask<BufferedImage> {
 	private Scene scene;
+	private int begin;
+	private int height;
+	private boolean fork;
 
 	public RayTracer(Scene scene) {
 		this.scene = scene;
+		this.begin = 0;
+		this.height = Config.HEIGHT;
+		this.fork = true;
+	}
+
+	public RayTracer(Scene scene, int begin, int height, boolean fork) {
+		this.scene = scene;
+		this.begin = begin;
+		this.height = height;
+		this.fork = fork;
 	}
 
 	/**
@@ -25,26 +38,23 @@ public class RayTracer {
 	 * @return Render image.
 	 */
 	public BufferedImage render() {
-		BufferedImage image = new BufferedImage(Config.WIDTH, Config.HEIGHT, BufferedImage.TYPE_INT_RGB);
+		BufferedImage image = new BufferedImage(Config.WIDTH, height, BufferedImage.TYPE_INT_RGB);
 
 		/* Compute color for each pixel */
-		for (int h = 0; h < Config.HEIGHT; h++) {
+		for (int h = 0; h < height; h++) {
 			for (int w = 0; w < Config.WIDTH; w++) {
 
 				/* Ray from camera to the scene */
 				Ray ray = scene.getCamera().getRay((double) (w - Config.WIDTH / 2),
-						(double) (Config.HEIGHT - h - Config.HEIGHT / 2));
+						(double) (Config.HEIGHT / 2 - (h + begin)));
 
 				/* Color of the pixel */
 				Color color = traceRay(ray, 0);
 				image.setRGB(w, h, color.getRGB());
-
-				/* Just print progression */
-				ProgressBar.print(h);
 			}
 		}
 
-		ProgressBar.print(Config.HEIGHT);
+		System.out.println("25% done");
 
 		/* Post processing */
 		if (Config.ANTI_ALIASING)
@@ -80,7 +90,6 @@ public class RayTracer {
 
 		/* If there is no intersection, nothing to do */
 		if (intersection != null) {
-
 			/* Compute object color */
 			pointColor = computeLightning(intersection);
 
@@ -91,9 +100,9 @@ public class RayTracer {
 
 			/* Recursive calls to compute reflected and refracted rays colors */
 			if (reflectionRate != 0.0)
-				reflectColor = traceRay(primitive.getReflected(ray, intersection.getPoint()), nbReflect + 1);
+				reflectColor = traceRay(primitive.getReflected(ray, intersection), nbReflect + 1);
 			if (refractionRate != 0.0)
-				refractColor = traceRay(primitive.getRefracted(ray, intersection.getPoint()), nbReflect + 1);
+				refractColor = traceRay(primitive.getRefracted(ray, intersection), nbReflect + 1);
 		}
 
 		/* Return the combinaison of all colors, weighted by the rates given by the material */
@@ -162,7 +171,7 @@ public class RayTracer {
 			if (!shadow)
 				/* Lambert's cosine law : the cosine between the ray and the
 				 * normal to the object surface gives the % of light received */
-				shade += intersection.getObject().getCosine(ray);
+				shade += intersection.getObject().getCosine(ray, intersection);
 		}
 
 		/* Negative cosine means the light is behind the object : no lightning */
@@ -170,7 +179,7 @@ public class RayTracer {
 			shade = 0.0;
 
 		/* Compute object color */
-		Color color = computeBrightness(intersection.getObject().getColor(intersection.getPoint()), shade);
+		Color color = computeBrightness(intersection.getObject().getColor(intersection), shade);
 
 		return color;
 	}
@@ -231,5 +240,44 @@ public class RayTracer {
 		}
 
 		return new Color(r, g, b);
+	}
+
+	@Override
+	protected BufferedImage compute() {
+		if (fork) {
+			BufferedImage image = new BufferedImage(Config.WIDTH, Config.HEIGHT, BufferedImage.TYPE_INT_RGB);
+
+			int height = Config.HEIGHT / 4;
+
+			RayTracer rt1 = new RayTracer(scene, 0, height, false);
+			RayTracer rt2 = new RayTracer(scene, height, height * 2, false);
+			RayTracer rt3 = new RayTracer(scene, height * 2, height * 3, false);
+			RayTracer rt4 = new RayTracer(scene, height * 3, height * 4, false);
+
+			rt2.fork();
+			rt3.fork();
+			rt4.fork();
+
+			BufferedImage i1 = rt1.compute();
+			BufferedImage i2 = rt2.join();
+			BufferedImage i3 = rt3.join();
+			BufferedImage i4 = rt4.join();
+
+			for (int h = 0; h < height; h++)
+				for (int w = 0; w < Config.WIDTH; w++)
+					image.setRGB(w, h, i1.getRGB(w, h));
+			for (int h = height; h < height * 2; h++)
+				for (int w = 0; w < Config.WIDTH; w++)
+					image.setRGB(w, h, i2.getRGB(w, h - height));
+			for (int h = height * 2; h < height * 3; h++)
+				for (int w = 0; w < Config.WIDTH; w++)
+					image.setRGB(w, h, i3.getRGB(w, h - 2 * height));
+			for (int h = height * 3; h < height * 4; h++)
+				for (int w = 0; w < Config.WIDTH; w++)
+					image.setRGB(w, h, i4.getRGB(w, h - 3 * height));
+
+			return image;
+		} else
+			return render();
 	}
 }

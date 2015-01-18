@@ -15,12 +15,12 @@ public class Scene {
 		this.camera = camera;
 	}
 
-	public void addPrimitive(Primitive primitive) {
-		this.primitives.add(primitive);
-	}
-
 	public void addLight(Light light) {
 		this.lights.add(light);
+	}
+
+	public void addPrimitive(Primitive primitive) {
+		this.primitives.add(primitive);
 	}
 
 	public Camera getCamera() {

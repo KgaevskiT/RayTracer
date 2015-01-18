@@ -14,6 +14,9 @@ public class Material {
 	public static Material METAL = new Material(new Color(160, 160, 160), 0.5, 0.0, 0.0);
 	public static Material WATER = new Material(new Color(100, 180, 255), 0.2, 0.4, 1.333);
 	public static Material MIRROR = new Material(Color.BLACK, 1.0, 0.0, 0.0);
+	//public static Material EARTH = new Material("textures/world.jpg", 0.0, 0.0, 0.0);
+	//public static Material MOON = new Material("textures/moon.jpg", 0.0, 0.0, 0.0);
+	//public static Material MARS = new Material("textures/mars.jpg", 0.0, 0.0, 0.0);
 	public static Double DIAMOND = 2.4175;
 
 	private Color color;

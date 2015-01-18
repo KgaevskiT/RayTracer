@@ -2,14 +2,14 @@ package config;
 
 public class Config {
 	/* Render image size */
-	public static int WIDTH = 600;
-	public static int HEIGHT = 400;
+	public static int WIDTH = 500;
+	public static int HEIGHT = 500;
 
 	/* Anti aliasing post process */
-	public static boolean ANTI_ALIASING = true;
+	public static boolean ANTI_ALIASING = false;
 
 	/* Ambient lightning */
-	public static double AMBIANT = 0.05;
+	public static double AMBIANT = 0.05;//0.05;
 
 	/* Maximum recursive reflection or refraction */
 	public static int MAX_REFLEXION = 3;
