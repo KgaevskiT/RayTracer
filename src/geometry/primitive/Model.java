@@ -33,6 +33,10 @@ public class Model extends Primitive {
 		setHitBox();
 	}
 
+	/**
+	 * Homothety from 0.
+	 * @param ratio Parameter of the homothety.
+	 */
 	public void resize(double ratio) {
 		for (Point3D p : vertices) {
 			p.x = p.x * ratio;
@@ -64,6 +68,12 @@ public class Model extends Primitive {
 		return closest;
 	}
 
+	/**
+	 * Calculate the closest intersection from two.
+	 * @param intersection1
+	 * @param intersection2
+	 * @return The closest intersection between intersection1 and intersection2.
+	 */
 	private Intersection getClosest(Intersection intersection1, Intersection intersection2) {
 		if (intersection1 == null && intersection2 == null)
 			return null;
@@ -143,6 +153,15 @@ public class Model extends Primitive {
 		//return null;
 	}
 
+	/**
+	 * Calculate the intersection between a ray and a triangle.
+	 * @param ray
+	 * @param faceId ID of the face
+	 * @param vert1
+	 * @param vert2
+	 * @param vert3
+	 * @return
+	 */
 	private Intersection intersectTriangle(Ray ray, int faceId, Point3D vert1,
 			Point3D vert2, Point3D vert3) {
 
@@ -150,48 +169,43 @@ public class Model extends Primitive {
 		Vector3D dir = ray.getDirection();
 		Point3D orig = ray.getOrigin();
 
-		// get triangle edge vectors and plane normal
-		Vector3D u = Vector3D.sub(vert2, vert1);
-		Vector3D v = Vector3D.sub(vert3, vert1);
-		Vector3D n = Vector3D.cross(u, v);
+		/* Triangle edge and plane normal */
+		Vector3D edge1 = Vector3D.sub(vert2, vert1);
+		Vector3D edge2 = Vector3D.sub(vert3, vert1);
+		Vector3D normal = Vector3D.cross(edge1, edge2);
 
 		Vector3D w0 = Vector3D.sub(orig, vert1);
-		double a = - Vector3D.dot(n, w0);
-		double b = Vector3D.dot(n, dir);
+		double a = - Vector3D.dot(normal, w0);
+		double b = Vector3D.dot(normal, dir);
 
-		if (Math.abs(b) < EPSILON) {     // ray is  parallel to triangle plane
-			if (a == 0)                 // ray lies in triangle plane
-				return null;
-			else
-				return null;              // ray disjoint from plane
-		}
+		/* Ray is parallel or on the triangle plane */
+		if (Math.abs(b) < EPSILON)
+			return null;
 
-		// get intersect point of ray with triangle plane
+		/* Get intersect point of ray with triangle plane */
 		double r = a / b;
-		if (r < EPSILON)                    // ray goes away from triangle
-			return null;                   // => no intersect
-		// for a segment, also test if (r > 1.0) => no intersect
+		if (r < EPSILON)
+			return null;
+		Point3D point = new Point3D(orig.x + r * dir.x, orig.y + r * dir.y, orig.z + r * dir.z);            // intersect point of ray and plane
 
-		Point3D I = new Point3D(orig.x + r * dir.x, orig.y + r * dir.y, orig.z + r * dir.z);            // intersect point of ray and plane
-
-		// is I inside T?
-		double uu = Vector3D.dot(u, u);
-		double uv = Vector3D.dot(u, v);
-		double vv = Vector3D.dot(v, v);
-		Vector3D w = Vector3D.sub(I, vert1);
-		double wu = Vector3D.dot(w, u);
-		double wv = Vector3D.dot(w,v);
+		/* Calculate if the point is in the triangle */
+		double uu = Vector3D.dot(edge1, edge1);
+		double uv = Vector3D.dot(edge1, edge2);
+		double vv = Vector3D.dot(edge2, edge2);
+		Vector3D w = Vector3D.sub(point, vert1);
+		double wu = Vector3D.dot(w, edge1);
+		double wv = Vector3D.dot(w,edge2);
 		double D = uv * uv - uu * vv;
 
-		// get and test parametric coords
+		// Get and test parametric coordinates */
 		double s = (uv * wv - vv * wu) / D;
-		if (s < 0.0 || s > 1.0)         // I is outside T
+		if (s < 0.0 || s > 1.0)
 			return null;
 		double t = (uv * wu - uu * wv) / D;
-		if (t < 0.0 || (s + t) > 1.0)  // I is outside T
+		if (t < 0.0 || (s + t) > 1.0)
 			return null;
 
-		return new Intersection(this, faceId, I, r); // I is in T
+		return new Intersection(this, faceId, point, r);
 	}
 
 	@Override
@@ -216,21 +230,15 @@ public class Model extends Primitive {
 
 		Vector3D faceNormal = Vector3D.cross(e1, e2);
 
+		/* If normals are defined, check the face normal direction */
 		if (normals.isEmpty())
 			return faceNormal;
 		else {
+			Vector3D[] vertexNormals = new Vector3D[triangle.getSize()];
+			for (int i = 0; i < triangle.getSize(); i++)
+				vertexNormals[i] = normals.get(triangle.vn[i]);
 
-			Vector3D vertexNormal;
-			if (triangle.getSize() == 3)
-				vertexNormal = Vector3D.mean(normals.get(triangle.vn[0]),
-						normals.get(triangle.vn[1]),
-						normals.get(triangle.vn[2]));
-			else
-				vertexNormal = Vector3D.mean(normals.get(triangle.vn[0]),
-						normals.get(triangle.vn[1]),
-						normals.get(triangle.vn[2]),
-						normals.get(triangle.vn[3]));
-
+			Vector3D vertexNormal = Vector3D.mean(vertexNormals);
 			double dot = Vector3D.dot(faceNormal, vertexNormal);
 
 			if (dot < 0.0) {
@@ -242,6 +250,11 @@ public class Model extends Primitive {
 		}
 	}
 
+	/**
+	 * Set the model hitbox.
+	 * The hitbox is a sphere having the model barycenter as center, and the
+	 * farrest vertex distance as radius.
+	 */
 	private void setHitBox() {
 		int maxX = 0, minX = 0, maxY = 0, minY = 0, maxZ = 0, minZ = 0;
 		for (int i = 1; i < vertices.size(); i++) {

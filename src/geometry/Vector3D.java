@@ -23,6 +23,11 @@ public class Vector3D {
 			normalize();
 	}
 
+	/**
+	 * Create a unitary Vector from the point p1 to p2.
+	 * @param p1
+	 * @param p2
+	 */
 	public Vector3D(Point3D p1, Point3D p2) {
 		this.x = p2.x - p1.x;
 		this.y = p2.y - p1.y;
@@ -31,6 +36,12 @@ public class Vector3D {
 		normalize();
 	}
 
+	/**
+	 * Create a Vector from the point p1 to p2.
+	 * @param p1
+	 * @param p2
+	 * @param normalize Normalize the vector if true.
+	 */
 	public Vector3D(Point3D p1, Point3D p2, boolean normalize) {
 		this.x = p2.x - p1.x;
 		this.y = p2.y - p1.y;
@@ -63,23 +74,30 @@ public class Vector3D {
 	}
 
 	/**
-	 * @param v1 First vector
-	 * @param v2 Second vector
-	 * @return Dot product between v1 and v2
+	 * Dot product between two vectors.
+	 * @param v1 First vector.
+	 * @param v2 Second vector.
+	 * @return
 	 */
 	public static double dot(Vector3D v1, Vector3D v2) {
 		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 	}
 
-	public static Vector3D mean(Vector3D v1, Vector3D v2, Vector3D v3) {
-		return new Vector3D((v1.x + v2.x + v3.x) / 3, (v1.y + v2.y + v3.y) / 3,
-				(v1.z + v2.z + v3.z) / 3);
-	}
+	/**
+	 * Calculate the mean of some vectors.
+	 * @param vectors The vector list
+	 * @return
+	 */
+	public static Vector3D mean(Vector3D[] vectors) {
+		double x = 0, y = 0, z = 0;
 
-	public static Vector3D mean(Vector3D v1, Vector3D v2, Vector3D v3, Vector3D v4) {
-		return new Vector3D((v1.x + v2.x + v3.x + v4.x) / 3,
-				(v1.y + v2.y + v3.y + v4.z) / 3,
-				(v1.z + v2.z + v3.z + v4.z) / 3);
+		for (Vector3D v : vectors) {
+			x += v.x;
+			y += v.y;
+			z += v.z;
+		}
+
+		return new Vector3D(x / vectors.length, y / vectors.length, z / vectors.length, false);
 	}
 
 	/**

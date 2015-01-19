@@ -19,6 +19,10 @@ public class RayTracer extends RecursiveTask<BufferedImage> {
 	private int height;
 	private boolean fork;
 
+	/**
+	 * Create a multithreaded RayTracer for a scene.
+	 * @param scene
+	 */
 	public RayTracer(Scene scene) {
 		this.scene = scene;
 		this.begin = 0;
@@ -26,16 +30,22 @@ public class RayTracer extends RecursiveTask<BufferedImage> {
 		this.fork = true;
 	}
 
-	public RayTracer(Scene scene, int begin, int height, boolean fork) {
+	/**
+	 * Create a RayTracer that compute a part of the render image.
+	 * @param scene
+	 * @param begin Height index to start.
+	 * @param height Height of the render image.
+	 */
+	public RayTracer(Scene scene, int begin, int height) {
 		this.scene = scene;
 		this.begin = begin;
 		this.height = height;
-		this.fork = fork;
+		this.fork = false;	// Only fork once
 	}
 
 	/**
-	 * Compute the render image of the scene.
-	 * @return Render image.
+	 * Main RayTracer function: Compute the render image of the scene.
+	 * @return Render image of the scene.
 	 */
 	public BufferedImage render() {
 		BufferedImage image = new BufferedImage(Config.WIDTH, height, BufferedImage.TYPE_INT_RGB);
@@ -44,17 +54,18 @@ public class RayTracer extends RecursiveTask<BufferedImage> {
 		for (int h = 0; h < height; h++) {
 			for (int w = 0; w < Config.WIDTH; w++) {
 
-				/* Ray from camera to the scene */
-				Ray ray = scene.getCamera().getRay((double) (w - Config.WIDTH / 2),
-						(double) (Config.HEIGHT / 2 - (h + begin)));
+				/* Get a ray from the camera to the scene */
+				// TODO: Camera.getRay() function has to be done
+				Ray ray = scene.getCamera().getRay(w - Config.WIDTH / 2,
+						Config.HEIGHT / 2 - (h + begin));
 
-				/* Color of the pixel */
+				/* Calculate the color of the pixel */
 				Color color = traceRay(ray, 0);
 				image.setRGB(w, h, color.getRGB());
 			}
 		}
 
-		System.out.println("25% done");
+		System.out.println("Thread finished");
 
 		/* Post processing */
 		if (Config.ANTI_ALIASING)
@@ -65,7 +76,7 @@ public class RayTracer extends RecursiveTask<BufferedImage> {
 
 	/**
 	 * Recursively compute the color of a pixel.
-	 * @param ray The original ray comming from the camera.
+	 * @param ray Incoming ray (from camera or from reflection or from refraction)
 	 * @param nbReflect Current number of reflections or refractions made.
 	 * @return The color of the pixel.
 	 */
@@ -75,25 +86,19 @@ public class RayTracer extends RecursiveTask<BufferedImage> {
 		if (nbReflect >= Config.MAX_REFLEXION)
 			return null;
 
-		/* Diffusion light : Color of the object */
-		Color pointColor = null;
-		/* Color from the reflected ray */
-		Color reflectColor = null;
-		/* Color from the refracted ray */
-		Color refractColor = null;
+		Color pointColor = null;	// Diffusion light: Color of the object.
+		Color reflectColor = null;	// Color from the reflected ray.
+		Color refractColor = null;	// Color from the refracted ray.
 
-		/* Compute first intersection from the camera */
-		Intersection intersection = getFirstIntersection(ray);
+		Intersection intersection = getFirstIntersection(ray);	// closest intersection
 
 		double reflectionRate = 0.0;
 		double refractionRate = 0.0;
 
-		/* If there is no intersection, nothing to do */
+		/* No intersection: Nothing to do */
 		if (intersection != null) {
-			/* Compute object color */
-			pointColor = computeLightning(intersection);
-
-			Primitive primitive = intersection.getObject();
+			pointColor = computeLightning(intersection);	// Compute object color
+			Primitive primitive = intersection.getObject();	// Object intersected
 
 			reflectionRate = primitive.getReflectionRate();
 			refractionRate = primitive.getRefractionRate();
@@ -105,17 +110,17 @@ public class RayTracer extends RecursiveTask<BufferedImage> {
 				refractColor = traceRay(primitive.getRefracted(ray, intersection), nbReflect + 1);
 		}
 
-		/* Return the combinaison of all colors, weighted by the rates given by the material */
+		/* Return the combination of all colors, weighted by the rates given by the material */
 		return combineColors(pointColor, reflectColor, refractColor, reflectionRate, refractionRate);
 	}
 
 	/**
-	 * Find first intersection from the ray origin.
+	 * Calculate the closest intersection from the ray origin.
 	 * @param ray Ray.
-	 * @return The first intersection or null if there is no intersection.
+	 * @return The closest intersection or null if there is no intersection.
 	 */
 	private Intersection getFirstIntersection(Ray ray) {
-		Intersection firstIntersection = null;
+		Intersection closest = null;
 
 		/* For each primitive, compute intersection and find the closest */
 		for (Primitive primitive : scene.getPrimitives()) {
@@ -123,17 +128,16 @@ public class RayTracer extends RecursiveTask<BufferedImage> {
 			Intersection intersection = primitive.intersect(ray);
 
 			/* No intersection */
-			if (intersection == null) {
+			if (intersection == null)
 				continue;
-			}
 
-			/* Find if this intersection is closer */
-			if (firstIntersection == null || intersection.getDistance() < firstIntersection.getDistance()) {
-				firstIntersection = intersection;
+			/* Calculate if the intersection is closer */
+			if (closest == null || intersection.getDistance() < closest.getDistance()) {
+				closest = intersection;
 			}
 		}
 
-		return firstIntersection;
+		return closest;
 	}
 
 	/**
@@ -249,10 +253,10 @@ public class RayTracer extends RecursiveTask<BufferedImage> {
 
 			int height = Config.HEIGHT / 4;
 
-			RayTracer rt1 = new RayTracer(scene, 0, height, false);
-			RayTracer rt2 = new RayTracer(scene, height, height * 2, false);
-			RayTracer rt3 = new RayTracer(scene, height * 2, height * 3, false);
-			RayTracer rt4 = new RayTracer(scene, height * 3, height * 4, false);
+			RayTracer rt1 = new RayTracer(scene, 0, height);
+			RayTracer rt2 = new RayTracer(scene, height, height * 2);
+			RayTracer rt3 = new RayTracer(scene, height * 2, height * 3);
+			RayTracer rt4 = new RayTracer(scene, height * 3, height * 4);
 
 			rt2.fork();
 			rt3.fork();

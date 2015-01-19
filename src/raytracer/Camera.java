@@ -23,6 +23,12 @@ public class Camera {
 		this.direction = new Vector3D(position, lookAt);
 	}
 
+	/**
+	 * TODO: Compute camera angle and perspective.
+	 * @param x X position of the final image.
+	 * @param y Y position of the final image.
+	 * @return
+	 */
 	public Ray getRay(double x, double y) {
 		return new Ray(new Point3D(position.x + x, position.y + y,
 				position.z), direction);
