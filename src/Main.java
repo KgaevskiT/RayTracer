@@ -23,7 +23,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		ForkJoinPool pool = new ForkJoinPool();
-		RayTracer rayTracer = new RayTracer(getReflect());
+		RayTracer rayTracer = new RayTracer(getPorsche());
 		BufferedImage image = pool.invoke(rayTracer);
 
 		try {
@@ -35,89 +35,86 @@ public class Main {
 	}
 
 	private static Scene getDucky() {
-		Scene scene = new Scene(new Camera(new Point3D(0., 0., 1000.), new Point3D(0., 0., 0.)));
+		Scene scene = new Scene(new Camera(new Point3D(500, 500, 500), Point3D.ORIGIN, 90));
 		WaveFront ducky = new WaveFront("obj/Ducky.obj");
 		scene.addPrimitive(ducky);
-		scene.addLight(new Light(new Point3D(100., 0., 100.), 50));
+		scene.addLight(new Light(new Point3D(300, 0, 300), 50));
 		return scene;
 	}
 
 	private static Scene getPorsche() {
-		Scene scene = new Scene(new Camera(new Point3D(1000., 0., 0.), new Point3D(0., 0., 0.)));
+		Scene scene = new Scene(new Camera(new Point3D(0, 0, 5), Point3D.ORIGIN, 90));
 		WaveFront porsche = new WaveFront("obj/porsche/Porsche_911_GT2.obj");
-		//porsche.resize(100);
 		scene.addPrimitive(porsche);
-		scene.addLight(new Light(new Point3D(200., 100., -500.), 50));
+		scene.addLight(new Light(new Point3D(2, 2, 2), 50));
 		return scene;
 	}
 
 	private static Scene getCube() {
-		Scene scene = new Scene(new Camera(new Point3D(0., 0., -1.), new Point3D(0., 0., 0.)));
+		Scene scene = new Scene(new Camera(new Point3D(-1, 2, -2), Point3D.ORIGIN, 90));
 		WaveFront cube = new WaveFront("obj/cube.obj");
-		cube.resize(100);
 		scene.addPrimitive(cube);
-		scene.addLight(new Light(new Point3D(0., 0.0, -50.), 50));
+		scene.addLight(new Light(new Point3D(2, 2, -2), 50));
 		return scene;
 	}
 
 	private static Scene getCubeSphere() {
-		Scene scene = new Scene(new Camera(new Point3D(10.0, 10.0, -10.0), new Point3D(0.0, 0.0, 0.0)));
+		Scene scene = new Scene(new Camera(new Point3D(-2, 2, -5), Point3D.ORIGIN, 90));
 		WaveFront cube = new WaveFront("obj/cube.obj");
-		Sphere sphere = new Sphere(new Point3D(300., 0., 100.), 100., new MattMaterial(Color.BLUE));
-		cube.resize(100);
+		Sphere sphere = new Sphere(new Point3D(-1, 0, 1), 1, new MattMaterial(Color.BLUE));
 		scene.addPrimitive(cube);
 		scene.addPrimitive(sphere);
-		scene.addLight(new Light(new Point3D(150.0, 300.0, -100.0), 50));
+		scene.addLight(new Light(new Point3D(0, 2, -2), 50));
 		return scene;
 	}
 
 	private static Scene getEarth() {
-		Scene scene = new Scene(new Camera(new Point3D(0.0, 0.0, -1000.0), new Point3D(0.0, 0.0, 0.0)));
-		scene.addPrimitive(new Sphere(new Point3D(0.0, 0.0, 0.0), 800.0, new MattMaterial("textures/mars.jpg")));
-		scene.addLight(new Light(new Point3D(500.0, 500.0, -2000.0), 50));
+		Scene scene = new Scene(new Camera(new Point3D(0, 0, -1000), Point3D.ORIGIN, 90));
+		scene.addPrimitive(new Sphere(new Point3D(0, 0, 0), 800, new MattMaterial("textures/mars.jpg")));
+		scene.addLight(new Light(new Point3D(500, 500, -2000), 50));
 		return scene;
 	}
 
 	private static Scene getBasic() {
-		Scene scene = new Scene(new Camera(new Point3D(0.0, 0.0, -1000.0), new Point3D(0.0, 0.0, 0.0)));
-		scene.addPrimitive(new Sphere(new Point3D(0.0, -1000.0, 0.0), 1000.0, new MattMaterial(Color.RED)));
-		scene.addPrimitive(new Sphere(new Point3D(100.0, 300.0, -100.0), 100.0, new BrightMaterial(Color.BLUE, 0.5)));
-		scene.addPrimitive(new Sphere(new Point3D(-200.0, 100.0, -100.0), 100.0, new BrightMaterial(Color.GREEN, 0.5)));
-		scene.addLight(new Light(new Point3D(0.0, 1000.0, 0.0), 50));
-		scene.addLight(new Light(new Point3D(300.0, -100.0, -1500.0), 100));
+		Scene scene = new Scene(new Camera(new Point3D(0, 0, -10), Point3D.ORIGIN, Math.PI));
+		scene.addPrimitive(new Sphere(new Point3D(0, -10, 0), 10, new MattMaterial(Color.RED)));
+		scene.addPrimitive(new Sphere(new Point3D(1, 3, -1), 1, new BrightMaterial(Color.BLUE, 0.5)));
+		scene.addPrimitive(new Sphere(new Point3D(-2, 1, -1), 1, new BrightMaterial(Color.GREEN, 0.5)));
+		scene.addLight(new Light(new Point3D(0, 10, 0), 50));
+		scene.addLight(new Light(new Point3D(3, -1, -15), 100));
 		return scene;
 	}
 
 	private static Scene getSimple() {
-		Scene scene = new Scene(new Camera(new Point3D(0.0, 0.0, -1000.0), new Point3D(0.0, 0.0, 0.0)));
-		scene.addPrimitive(new Sphere(new Point3D(0.0, 0.0, 0.0), 500.0, new MattMaterial(Color.RED)));
-		scene.addLight(new Light(new Point3D(400.0, 500.0, -1000.0), 50));
+		Scene scene = new Scene(new Camera(new Point3D(0, 0, 10), Point3D.ORIGIN, Math.PI / 2));
+		scene.addPrimitive(new Sphere(new Point3D(0, 0, 0), 1, new MattMaterial(Color.RED)));
+		scene.addLight(new Light(new Point3D(2, 2, 2), 50));
 		return scene;
 	}
 
 	private static Scene getScene() {
-		Scene scene = new Scene(new Camera(new Point3D(0.0, 0.0, -300.0), new Point3D(0.0, 0.0, 0.0)));
-		scene.addPrimitive(new Sphere(new Point3D(-50.0, 0.0, -20.0), 100.0, new MattMaterial(Color.GREEN)));
-		scene.addPrimitive(new Sphere(new Point3D(150.0, -50.0, 80.0), 80.0, new MattMaterial(Color.RED)));
-		scene.addPrimitive(new Sphere(new Point3D(-200.0, 50.0, 0.0), 50.0, new MattMaterial(Color.BLUE)));
-		scene.addPrimitive(new Sphere(new Point3D(-100.0, 170.0, -100.0), 20.0, new MattMaterial(Color.ORANGE)));
-		scene.addPrimitive(new Sphere(new Point3D(250.0, -100.0, 300.0), 200.0, new MattMaterial(Color.PINK)));
-		scene.addPrimitive(new Sphere(new Point3D(-220.0, -100.0, 0.0), 60.0, new MattMaterial(Color.CYAN)));
-		scene.addPrimitive(new Sphere(new Point3D(0.0, 0.0, 1000.0), 250.0, new MattMaterial(Color.GRAY)));
-		scene.addLight(new Light(new Point3D(-100.0, 100.0, -300.0), 50));
+		Scene scene = new Scene(new Camera(new Point3D(0, 0, -8), Point3D.ORIGIN, 90));
+		scene.addPrimitive(new Sphere(new Point3D(-0.5, 0, -0.2), 1, new MattMaterial(Color.GREEN)));
+		scene.addPrimitive(new Sphere(new Point3D(1.5, -0.5, 0.8), 0.8, new MattMaterial(Color.RED)));
+		scene.addPrimitive(new Sphere(new Point3D(-2, 0.5, 0), 0.5, new MattMaterial(Color.BLUE)));
+		scene.addPrimitive(new Sphere(new Point3D(-1, 1.7, -1), 0.2, new MattMaterial(Color.ORANGE)));
+		scene.addPrimitive(new Sphere(new Point3D(2.5, -1, 3), 2, new MattMaterial(Color.PINK)));
+		scene.addPrimitive(new Sphere(new Point3D(-2.2, -1, 0), 0.6, new MattMaterial(Color.CYAN)));
+		scene.addPrimitive(new Sphere(new Point3D(0, 0, 10), 2.5, new MattMaterial(Color.GRAY)));
+		scene.addLight(new Light(new Point3D(-1, 1, -3), 50));
 		return scene;
 	}
 
 	private static Scene getReflect() {
-		Scene scene = new Scene(new Camera(new Point3D(0.0, 0.0, -300.0), new Point3D(0.0, 0.0, 0.0)));
-		scene.addPrimitive(new Sphere(new Point3D(-50.0, 0.0, -20.0), 100.0, new BrightMaterial(Color.ORANGE, 0.5)));
-		scene.addPrimitive(new Sphere(new Point3D(150.0, -50.0, 80.0), 80.0, new MattMaterial(Color.RED)));
-		scene.addPrimitive(new Sphere(new Point3D(-200.0, 50.0, 0.0), 50.0, Material.WATER));
-		scene.addPrimitive(new Sphere(new Point3D(-100.0, 170.0, -100.0), 20.0, Material.METAL));
-		scene.addPrimitive(new Sphere(new Point3D(250.0, -100.0, 300.0), 200.0, new MattMaterial(Color.GREEN)));
-		scene.addPrimitive(new Sphere(new Point3D(-220.0, -100.0, 0.0), 60.0, new MattMaterial(Color.CYAN)));
-		scene.addPrimitive(new Sphere(new Point3D(0.0, 0.0, 1000.0), 250.0, Material.MIRROR));
-		scene.addLight(new Light(new Point3D(-100.0, 100.0, -300.0), 50));
+		Scene scene = new Scene(new Camera(new Point3D(0, 0, -8), Point3D.ORIGIN, 90));
+		scene.addPrimitive(new Sphere(new Point3D(-0.5, 0, -0.2), 1, new BrightMaterial(Color.ORANGE, 0.5)));
+		scene.addPrimitive(new Sphere(new Point3D(1.5, -0.5, 0.8), 0.8, new BrightMaterial(Color.RED, 0.5)));
+		scene.addPrimitive(new Sphere(new Point3D(-2, 0.5, 0), 0.5, Material.WATER));
+		scene.addPrimitive(new Sphere(new Point3D(-1, 1.7, -1), 0.2, Material.METAL));
+		scene.addPrimitive(new Sphere(new Point3D(2.5, -1, 3), 2, new BrightMaterial(Color.GREEN, 0.5)));
+		scene.addPrimitive(new Sphere(new Point3D(-2.2, -1, 0), 0.6, new BrightMaterial(Color.CYAN, 0.5)));
+		scene.addPrimitive(new Sphere(new Point3D(0, 0, 10), 2.5, Material.MIRROR));
+		scene.addLight(new Light(new Point3D(-1, 1, -3), 50));
 		return scene;
 	}
 }

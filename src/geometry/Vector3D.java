@@ -2,11 +2,11 @@ package geometry;
 
 
 public class Vector3D {
-	public Double x;
-	public Double y;
-	public Double z;
+	public double x;
+	public double y;
+	public double z;
 
-	public Vector3D(Double x, Double y, Double z) {
+	public Vector3D(double x, double y, double z) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -14,7 +14,7 @@ public class Vector3D {
 		normalize();
 	}
 
-	public Vector3D(Double x, Double y, Double z, boolean normalize) {
+	public Vector3D(double x, double y, double z, boolean normalize) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -54,12 +54,26 @@ public class Vector3D {
 	/**
 	 * Set the vector's length to 1
 	 */
-	private void normalize() {
+	public void normalize() {
 		Double length = length();
 
 		this.x /= length;
 		this.y /= length;
 		this.z /= length;
+	}
+
+	/**
+	 * @param vectors A vector list.
+	 * @return The sum of all the vectors.
+	 */
+	public static Vector3D add(Vector3D[] vectors) {
+		double x = 0, y = 0, z = 0;
+		for (Vector3D v : vectors) {
+			x += v.x;
+			y += v.y;
+			z += v.z;
+		}
+		return new Vector3D(x, y, z, false);
 	}
 
 	/**
@@ -74,19 +88,17 @@ public class Vector3D {
 	}
 
 	/**
-	 * Dot product between two vectors.
 	 * @param v1 First vector.
 	 * @param v2 Second vector.
-	 * @return
+	 * @return Dot product between two vectors.
 	 */
 	public static double dot(Vector3D v1, Vector3D v2) {
 		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 	}
 
 	/**
-	 * Calculate the mean of some vectors.
-	 * @param vectors The vector list
-	 * @return
+	 * @param vectors The vector list.
+	 * @return The mean of all vectors.
 	 */
 	public static Vector3D mean(Vector3D[] vectors) {
 		double x = 0, y = 0, z = 0;
@@ -101,6 +113,15 @@ public class Vector3D {
 	}
 
 	/**
+	 * @param scalar Real number
+	 * @param vector Vector
+	 * @return The vector v multiplied by the scalar.
+	 */
+	public static Vector3D mul(double scalar, Vector3D vector) {
+		return new Vector3D(scalar * vector.x, scalar * vector.y, scalar * vector.z, false);
+	}
+
+	/**
 	 * Substract the coordinates of the point p1 to the coordinates of p2
 	 * @param p1
 	 * @param p2
@@ -108,6 +129,15 @@ public class Vector3D {
 	 */
 	public static Vector3D sub(Point3D p1, Point3D p2) {
 		return new Vector3D(p1.x - p2.x, p1.y - p2.y, p1.z - p2.z, false);
+	}
+
+	/**
+	 * @param v1 First vector
+	 * @param v2 Second vector
+	 * @return The second vector subtracted to the first vector.
+	 */
+	public static Vector3D sub(Vector3D v1, Vector3D v2) {
+		return new Vector3D(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z, false);
 	}
 
 	/**
@@ -120,8 +150,7 @@ public class Vector3D {
 	}
 
 	/**
-	 * Euclidian length
-	 * @return The vector's length
+	 * @return The vector's Euclidian length
 	 */
 	public double length() {
 		return Math.sqrt(x * x + y * y + z * z);

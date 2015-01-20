@@ -256,44 +256,22 @@ public class Model extends Primitive {
 	 * farrest vertex distance as radius.
 	 */
 	private void setHitBox() {
-		int maxX = 0, minX = 0, maxY = 0, minY = 0, maxZ = 0, minZ = 0;
-		for (int i = 1; i < vertices.size(); i++) {
-			if (vertices.get(i).x > vertices.get(maxX).x)
-				maxX = i;
-			if (vertices.get(i).x < vertices.get(minX).x)
-				minX = i;
-			if (vertices.get(i).y > vertices.get(maxY).y)
-				maxY = i;
-			if (vertices.get(i).y < vertices.get(minY).y)
-				minY = i;
-			if (vertices.get(i).z > vertices.get(maxZ).z)
-				maxZ = i;
-			if (vertices.get(i).z < vertices.get(minZ).z)
-				minZ = i;
+		double x = 0, y = 0, z = 0;
+		for (Point3D p : vertices) {
+			x += p.x;
+			y += p.y;
+			z += p.z;
 		}
-		Point3D center = Point3D.barycenter(new Point3D[] {
-				vertices.get(maxX), vertices.get(minX),	vertices.get(maxY),
-				vertices.get(minY),	vertices.get(maxZ), vertices.get(minZ) });
+
+		Point3D center = new Point3D(x / vertices.size(),
+				y / vertices.size(), z / vertices.size());
 
 		double radius = 0;
-		double distance = center.distance(vertices.get(maxX));
-		if (distance > radius)
-			radius = distance;
-		distance = center.distance(vertices.get(minX));
-		if (distance > radius)
-			radius = distance;
-		distance = center.distance(vertices.get(maxY));
-		if (distance > radius)
-			radius = distance;
-		distance = center.distance(vertices.get(minY));
-		if (distance > radius)
-			radius = distance;
-		distance = center.distance(vertices.get(maxZ));
-		if (distance > radius)
-			radius = distance;
-		distance = center.distance(vertices.get(minZ));
-		if (distance > radius)
-			radius = distance;
+		for (Point3D p : vertices) {
+			double distance = center.distance(p);
+			if (distance > radius)
+				radius = distance;
+		}
 
 		hitbox = new Sphere(center, radius, Material.VOID);
 	}

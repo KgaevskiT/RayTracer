@@ -55,9 +55,7 @@ public class RayTracer extends RecursiveTask<BufferedImage> {
 			for (int w = 0; w < Config.WIDTH; w++) {
 
 				/* Get a ray from the camera to the scene */
-				// TODO: Camera.getRay() function has to be done
-				Ray ray = scene.getCamera().getRay(w - Config.WIDTH / 2,
-						Config.HEIGHT / 2 - (h + begin));
+				Ray ray = scene.getCamera().getRay(h + begin, w);
 
 				/* Calculate the color of the pixel */
 				Color color = traceRay(ray, 0);
