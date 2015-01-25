@@ -90,4 +90,8 @@ public class Sphere extends Primitive {
 	public double getRadius() {
 		return this.radius;
 	}
+
+	public void move(Vector3D v) {
+		center.move(v);
+	}
 }

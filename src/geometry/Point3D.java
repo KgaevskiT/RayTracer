@@ -39,6 +39,12 @@ public class Point3D {
 		return new Point3D((p1.x + p2.x) / 2, (p1.y + p2.y) / 2, (p1.z + p2.z) / 2);
 	}
 
+	public void move(Vector3D v) {
+		x += v.x;
+		y += v.y;
+		z += v.z;
+	}
+
 	public Point3D sub(Point3D p) {
 		return new Point3D(x - p.x, y - p.y, z - p.z);
 	}

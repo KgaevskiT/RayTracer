@@ -39,10 +39,16 @@ public class Model extends Primitive {
 	 */
 	public void resize(double ratio) {
 		for (Point3D p : vertices) {
-			p.x = p.x * ratio;
-			p.y = p.y * ratio;
-			p.z = p.z * ratio;
+			p.x *= ratio;
+			p.y *= ratio;
+			p.z *= ratio;
 		}
+	}
+
+	public void move(Vector3D v) {
+		for (Point3D p : vertices)
+			p.move(v);
+		hitbox.move(v);
 	}
 
 	@Override

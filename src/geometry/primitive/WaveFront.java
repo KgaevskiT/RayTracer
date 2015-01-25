@@ -135,4 +135,9 @@ public class WaveFront extends Primitive {
 			g.resize(ratio);
 	}
 
+	public void move(Vector3D v) {
+		for (Model g : models)
+			g.move(v);
+	}
+
 }

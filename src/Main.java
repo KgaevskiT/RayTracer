@@ -1,4 +1,5 @@
 import geometry.Point3D;
+import geometry.Vector3D;
 import geometry.primitive.Light;
 import geometry.primitive.Scene;
 import geometry.primitive.Sphere;
@@ -23,7 +24,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		ForkJoinPool pool = new ForkJoinPool();
-		RayTracer rayTracer = new RayTracer(getPorsche());
+		RayTracer rayTracer = new RayTracer(getTableLamp());
 		BufferedImage image = pool.invoke(rayTracer);
 
 		try {
@@ -42,8 +43,19 @@ public class Main {
 		return scene;
 	}
 
+	private static Scene getTableLamp() {
+		Scene scene = new Scene(new Camera(new Point3D(0, 20, 200), new Vector3D(0, 0, -1), 90));
+		WaveFront lamp = new WaveFront("obj/lamp.obj");
+		WaveFront table = new WaveFront("obj/table.obj");
+		table.move(new Vector3D(0, -100, 0));
+		scene.addPrimitive(lamp);
+		scene.addPrimitive(table);
+		scene.addLight(new Light(new Point3D(30, 30, 30), 50));
+		return scene;
+	}
+
 	private static Scene getPorsche() {
-		Scene scene = new Scene(new Camera(new Point3D(0, 0, 5), Point3D.ORIGIN, 90));
+		Scene scene = new Scene(new Camera(new Point3D(2, 2, -5), Point3D.ORIGIN, 90));
 		WaveFront porsche = new WaveFront("obj/porsche/Porsche_911_GT2.obj");
 		scene.addPrimitive(porsche);
 		scene.addLight(new Light(new Point3D(2, 2, 2), 50));

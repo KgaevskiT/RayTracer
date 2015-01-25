@@ -30,6 +30,21 @@ public class Camera {
 	}
 
 	/**
+	 * Set the top by default to the natural top (0, 1, 0)
+	 * @param position Position of the camera.
+	 * @param lookAt Center of the render image.
+	 * @param fieldOfView Angle of view.
+	 */
+	public Camera(Point3D position, Vector3D direction, double fieldOfView) {
+		this.origin = position;
+		this.U = direction;
+		this.V = new Vector3D(0, 1, 0);
+		this.W = Vector3D.cross(V, U);
+		this.W.normalize();
+		this.focal = 2;//1 / Math.tan(fieldOfView / 2);
+	}
+
+	/**
 	 * @param position Position of the camera.
 	 * @param lookAt Center of the render image.
 	 * @param up Approximative direction of the top.
