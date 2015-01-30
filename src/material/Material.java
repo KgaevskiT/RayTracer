@@ -20,21 +20,19 @@ public class Material {
 	public static Double DIAMOND = 2.4175;
 
 	private Color color;
-	private BufferedImage texture;
+	private BufferedImage texture = null;
 	private double reflectionRate;
 	private double refractionRate;
 	private double refractionIndex;
 
 	public Material(Color color, double reflectionRate,	double refractionRate, double refractionIndex) {
 		this.color = color;
-		this.texture = null;
 		this.reflectionRate = reflectionRate;
 		this.refractionRate = refractionRate;
 		this.refractionIndex = refractionIndex;
 	}
 
 	public Material(String texture, double reflectionRate, double refractionRate, double refractionIndex) {
-		this.color = null;
 		try {
 			this.texture = ImageIO.read(new File(texture));
 		} catch (IOException e) {

@@ -224,35 +224,43 @@ public class Model extends Primitive {
 	}
 
 	@Override
+	public double getCosine(Ray ray, Intersection intersection) {
+		Vector3D normal = getNormal(intersection);
+		double cosine = Vector3D.dot(ray.getDirection(), normal);
+
+		if (cosine < 0) {
+			normal.inverse();
+			cosine = Vector3D.dot(ray.getDirection(), normal);
+		}
+
+		return cosine;
+	}
+
+	@Override
 	public Vector3D getNormal(Intersection intersection) {
 		Face triangle = faces.get(intersection.getFaceId());
-		/* Triangle vertices */
-		Point3D v1 = vertices.get(triangle.v[0]);
-		Point3D v2 = vertices.get(triangle.v[1]);
-		Point3D v3 = vertices.get(triangle.v[2]);
-		/* Triangle edges */
-		Vector3D e1 = new Vector3D(v1, v2);
-		Vector3D e2 = new Vector3D(v1, v3);
 
-		Vector3D faceNormal = Vector3D.cross(e1, e2);
+		if (normals.isEmpty()) {
+			/* Triangle vertices */
+			Point3D v1 = vertices.get(triangle.v[0]);
+			Point3D v2 = vertices.get(triangle.v[1]);
+			Point3D v3 = vertices.get(triangle.v[2]);
+			/* Triangle edges */
+			Vector3D e1 = new Vector3D(v1, v2);
+			Vector3D e2 = new Vector3D(v1, v3);
 
-		/* If normals are defined, check the face normal direction */
-		if (normals.isEmpty())
+			Vector3D faceNormal = Vector3D.cross(e1, e2);
+
 			return faceNormal;
-		else {
+
+		} else {
 			Vector3D[] vertexNormals = new Vector3D[triangle.getSize()];
 			for (int i = 0; i < triangle.getSize(); i++)
 				vertexNormals[i] = normals.get(triangle.vn[i]);
 
 			Vector3D vertexNormal = Vector3D.mean(vertexNormals);
-			double dot = Vector3D.dot(faceNormal, vertexNormal);
 
-			if (dot < 0.0) {
-				faceNormal.inverse();
-				return faceNormal;
-			}
-			else
-				return faceNormal;
+			return vertexNormal;
 		}
 	}
 

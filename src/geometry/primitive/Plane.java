@@ -35,30 +35,30 @@ public class Plane extends Primitive {
 
 	@Override
 	public Intersection intersect(Ray ray) {
-		Point3D origin = ray.getOrigin();
-		Vector3D direction = ray.getDirection();
+		Point3D O = ray.getOrigin();
+		Vector3D dir = ray.getDirection();
 
-		double x = origin.x - point.x;
-		double y = origin.y - point.y;
-		double z = origin.z - point.z;
+		double x = O.x - point.x;
+		double y = O.y - point.y;
+		double z = O.z - point.z;
 
-		double denominator = a * direction.x + b * direction.y + c * direction.z;
+		double denominator = a * dir.x + b * dir.y + c * dir.z;
 
-		if (denominator == 0.0) {
+		if (denominator == 0) {
 			return null;
 		}
 
 		double t = - ((a * x) + (b * y) + (c * z) + d) / denominator;
 
-		Point3D p = new Point3D(origin.x + t * direction.x,
-				origin.y + t * direction.y,
-				origin.z + t * direction.z);
+		Point3D p = new Point3D(O.x + t * dir.x,
+				O.y + t * dir.y,
+				O.z + t * dir.z);
 
-		if (t <= 0) {
+		if (t <= EPSILON) {
 			return null;
 		}
 
-		Intersection intersection = new Intersection(this, p, origin.distance(p));
+		Intersection intersection = new Intersection(this, p, O.distance(p));
 
 		return intersection;
 	}
@@ -69,8 +69,20 @@ public class Plane extends Primitive {
 	}
 
 	@Override
+	public double getCosine(Ray ray, Intersection intersection) {
+		Vector3D normal = getNormal(null);
+		double cosine = Vector3D.dot(ray.getDirection(), normal);
+
+		if (cosine < 0) {
+			normal.inverse();
+			cosine = Vector3D.dot(ray.getDirection(), normal);
+		}
+
+		return cosine;
+	}
+
+	@Override
 	public Vector3D getNormal(Intersection intersection) {
 		return new Vector3D(a, b, c);
 	}
-
 }

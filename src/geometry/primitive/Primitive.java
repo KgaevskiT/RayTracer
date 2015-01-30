@@ -18,12 +18,21 @@ public abstract class Primitive {
 		this.material = material;
 	}
 
+	public Primitive(Material material, String name) {
+		this.material = material;
+		this.name = name;
+	}
+
 	public abstract Vector3D getNormal(Intersection intersection);
 	public abstract Intersection intersect(Ray ray);
 	public abstract Color getColor(Intersection intersection);
 
 	public double getCosine(Ray ray, Intersection intersection) {
 		return Vector3D.dot(getNormal(intersection), ray.getDirection());
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public Ray getReflected(Ray ray, Intersection intersection) {
@@ -42,7 +51,13 @@ public abstract class Primitive {
 
 	public Ray getRefracted(Ray ray, Intersection intersection) {
 		double oldRefIndex = ray.getRefractionIndex();
-		double newRefIndex = this.material.getRefractionIndex();
+		double newRefIndex;
+		boolean isInObject = ray.isInObject();
+
+		if (isInObject)
+			newRefIndex = 1.0;
+		else
+			newRefIndex = this.material.getRefractionIndex();
 
 		double n = oldRefIndex / newRefIndex;
 
@@ -56,7 +71,7 @@ public abstract class Primitive {
 				(n * direction.y) + (n * c1 - c2) * normal.y,
 				(n * direction.z) + (n * c1 - c2) * normal.z);
 
-		Ray refracted = new Ray(intersection.getPoint(), refractedDir, newRefIndex);
+		Ray refracted = new Ray(intersection.getPoint(), refractedDir, newRefIndex, !isInObject);
 
 		return refracted;
 	}

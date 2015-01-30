@@ -90,8 +90,8 @@ public class RayTracer extends RecursiveTask<BufferedImage> {
 
 		Intersection intersection = getFirstIntersection(ray);	// closest intersection
 
-		double reflectionRate = 0.0;
-		double refractionRate = 0.0;
+		double reflectionRate = 0;
+		double refractionRate = 0;
 
 		/* No intersection: Nothing to do */
 		if (intersection != null) {
@@ -102,9 +102,9 @@ public class RayTracer extends RecursiveTask<BufferedImage> {
 			refractionRate = primitive.getRefractionRate();
 
 			/* Recursive calls to compute reflected and refracted rays colors */
-			if (reflectionRate != 0.0)
+			if (reflectionRate != 0)
 				reflectColor = traceRay(primitive.getReflected(ray, intersection), nbReflect + 1);
-			if (refractionRate != 0.0)
+			if (refractionRate != 0)
 				refractColor = traceRay(primitive.getRefracted(ray, intersection), nbReflect + 1);
 		}
 
@@ -148,37 +148,41 @@ public class RayTracer extends RecursiveTask<BufferedImage> {
 		/* Init a ray with the intersection point as origin */
 		Ray ray = new Ray(intersection.getPoint());
 
-		Double shade = 0.0;
+		double transparency = 1;
+		double shade = 0;
 
 		/* For each lights, find the ones that reach the point (no intersection) */
 		for (Light light : scene.getLights()) {
+			transparency = 1;
 
 			/* Set the ray direction (from intersection point to the light) */
 			ray.setDirection(new Vector3D(ray.getOrigin(), light.getPosition()));
+			double distance = ray.getOrigin().distance(light.getPosition());
 
 			/* Find if the point is in the shadow of another object ? */
-			boolean shadow = false;
 			for (Primitive model : scene.getPrimitives()) {
 				Intersection objectIntersection = model.intersect(ray);
 
-				/* Intersection found : no contribution from this light */
+				/* Intersection found */
 				if (objectIntersection != null) {
-					shadow = true;
-					break;
+					/* Intersection between object and light */
+					if (Math.sqrt(intersection.getDistance()) < distance) {
+						transparency *= objectIntersection.getObject().getRefractionRate();
+					}
 				}
 			}
 
-			/* If the ray from the intersection point and the light is not
-			 * intersected by another object, the light contributes */
-			if (!shadow)
-				/* Lambert's cosine law : the cosine between the ray and the
-				 * normal to the object surface gives the % of light received */
-				shade += intersection.getObject().getCosine(ray, intersection);
+			/* Lambert's cosine law : the cosine between the ray and the
+			 * normal to the object surface gives the % of light received */
+			double lightning = transparency * intersection.getObject().getCosine(ray, intersection);
+
+			if (lightning > shade)
+				shade = lightning;
 		}
 
 		/* Negative cosine means the light is behind the object : no lightning */
-		if (shade <= 0.0)
-			shade = 0.0;
+		if (shade <= 0)
+			shade = 0;
 
 		/* Compute object color */
 		Color color = computeBrightness(intersection.getObject().getColor(intersection), shade);
@@ -192,11 +196,11 @@ public class RayTracer extends RecursiveTask<BufferedImage> {
 	 * @param shade Shade %.
 	 * @return Color seen.
 	 */
-	private Color computeBrightness(Color color, Double shade) {
+	private Color computeBrightness(Color color, double shade) {
 		/* % of the original color kept :
 		 * - Ambiant is the minimal ambiant lightning if there are no light source
 		 * - (1 - Ambiant) is the contribution of the lights (depends on shade) */
-		Double coef = Config.AMBIANT + (1 - Config.AMBIANT) * shade;
+		double coef = Config.AMBIANT + (1 - Config.AMBIANT) * shade;
 
 		int r = (int) (color.getRed() * coef);
 		int g = (int) (color.getGreen() * coef);
@@ -221,6 +225,7 @@ public class RayTracer extends RecursiveTask<BufferedImage> {
 	private Color combineColors(Color pointColor, Color reflectColor, Color refractColor,
 			double reflectionRate, double refractionRate) {
 		double diffusionRate = 1 - reflectionRate - refractionRate;
+
 		int r = 0;
 		int g = 0;
 		int b = 0;

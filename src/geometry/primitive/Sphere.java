@@ -20,10 +20,16 @@ public class Sphere extends Primitive {
 		this.radius = radius;
 	}
 
+	public Sphere(Point3D center, double radius, Material material, String name) {
+		super(material, name);
+		this.center = center;
+		this.radius = radius;
+	}
+
 	@Override
 	public Intersection intersect(Ray ray) {
 		Point3D O = ray.getOrigin();		// Ray origin E
-		Vector3D D = ray.getDirection();	// Ray direction V
+		Vector3D D = ray.getDirection();
 		Vector3D OC = new Vector3D(O, this.center, false);
 
 		double v = Vector3D.dot(OC, D);
@@ -43,6 +49,16 @@ public class Sphere extends Primitive {
 	}
 
 	@Override
+	public double getCosine(Ray ray, Intersection intersection) {
+		Vector3D normal = getNormal(intersection);
+
+		if (ray.isInObject())
+			normal.inverse();
+
+		return Vector3D.dot(ray.getDirection(), normal);
+	}
+
+	@Override
 	public Vector3D getNormal(Intersection intersection) {
 		return new Vector3D(this.center, intersection.getPoint());
 	}
@@ -56,9 +72,9 @@ public class Sphere extends Primitive {
 		/* Texture */
 
 		// North pole
-		Vector3D vn = new Vector3D(0.0, 0.1, 0.0);
+		Vector3D vn = new Vector3D(0, 1, 0); // Vector3D.Y;
 		// Equator
-		Vector3D ve = new Vector3D(1.0, 0.0, 0.0);
+		Vector3D ve = new Vector3D(1, 0, 0); // Vector3D.X;
 		// Position
 		Vector3D vp = new Vector3D(this.center, intersection.getPoint());
 
@@ -82,9 +98,11 @@ public class Sphere extends Primitive {
 		int w = (int) (u * texture.getWidth());
 
 		h = h == 0 ? 1 : h;
+		h = h == texture.getHeight() ? texture.getHeight() - 1 : h;
 		w = w == 0 ? 1 : w;
+		w = w == texture.getWidth() ? texture.getWidth() - 1 : w;
 
-		return new Color(texture.getRGB(texture.getWidth() - w, texture.getHeight() - h));
+		return new Color(texture.getRGB(w, texture.getHeight() - h));
 	}
 
 	public double getRadius() {

@@ -8,14 +8,13 @@ public class Intersection {
 	private int faceId;
 	private Point3D point;
 	private double distance;
-	private Vector3D normal;
+	private Vector3D normal = null;
 
 	public Intersection(Primitive object, Point3D point, double distance) {
 		this.object = object;
 		this.faceId = -1;
 		this.point = point;
 		this.distance = distance;
-		this.normal = null;
 	}
 
 	public Intersection(Primitive object, int faceId, Point3D point, double distance) {
@@ -23,7 +22,6 @@ public class Intersection {
 		this.faceId = faceId;
 		this.point = point;
 		this.distance = distance;
-		this.normal = null;
 	}
 
 	public double getDistance() {

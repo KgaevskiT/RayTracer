@@ -2,6 +2,10 @@ package geometry;
 
 
 public class Vector3D {
+	public static Vector3D X = new Vector3D(1, 0, 0);
+	public static Vector3D Y = new Vector3D(0, 1, 0);
+	public static Vector3D Z = new Vector3D(0, 0, 1);
+
 	public double x;
 	public double y;
 	public double z;

@@ -2,8 +2,8 @@ package config;
 
 public class Config {
 	/* Render image size */
-	public static int WIDTH = 500;
-	public static int HEIGHT = 500;
+	public static int WIDTH = 1000;
+	public static int HEIGHT = 1000;
 
 	/* Anti aliasing post process */
 	public static boolean ANTI_ALIASING = false;
